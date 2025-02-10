@@ -119,9 +119,9 @@ function Home() {
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                 <span className="text-xl font-bold">1</span>
               </div>
-              <h3 className="font-semibold">Upload Video</h3>
+              <h3 className="font-semibold">Upload content</h3>
               <p className="text-muted-foreground">
-                Upload any video file for analysis
+                Upload any content for analysis
               </p>
             </div>
             <div className="space-y-4">
@@ -130,7 +130,7 @@ function Home() {
               </div>
               <h3 className="font-semibold">AI Analysis</h3>
               <p className="text-muted-foreground">
-                Our AI analyzes every frame for manipulation
+                Our AI analyzes every type of manipulation
               </p>
             </div>
             <div className="space-y-4">
