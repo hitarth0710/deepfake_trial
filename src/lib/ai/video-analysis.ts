@@ -1,5 +1,3 @@
-// Video analysis using PyTorch model through API
-
 interface FrameAnalysisResult {
   isFake: boolean;
   confidence: number;
@@ -16,90 +14,78 @@ interface VideoAnalysisResult {
 
 export class VideoAnalyzer {
   private API_URL = "http://localhost:8000";
+
   constructor() {
     // Initialize any required resources
   }
 
-  private async extractFrames(
-    videoFile: File,
-    fps: number = 1,
-  ): Promise<HTMLCanvasElement[]> {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement("video");
-      const frames: HTMLCanvasElement[] = [];
-
-      video.onloadedmetadata = () => {
-        const duration = video.duration;
-        const frameCount = Math.floor(duration * fps);
-        let currentFrame = 0;
-
-        const processFrame = () => {
-          if (currentFrame >= frameCount) {
-            resolve(frames);
-            return;
-          }
-
-          const canvas = document.createElement("canvas");
-          canvas.width = 224; // Model input size
-          canvas.height = 224;
-          const ctx = canvas.getContext("2d");
-
-          if (ctx) {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            frames.push(canvas);
-          }
-
-          video.currentTime = currentFrame++ / fps;
-        };
-
-        video.onseeked = processFrame;
-        processFrame();
-      };
-
-      video.onerror = reject;
-      video.src = URL.createObjectURL(videoFile);
-    });
+  private async checkModelStatus(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.API_URL}/status`);
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 
-  private async sendVideoForAnalysis(file: File): Promise<VideoAnalysisResult> {
+  private async sendVideoForAnalysis(
+    file: File,
+    onProgress?: (stage: string, progress: number) => void,
+  ): Promise<VideoAnalysisResult> {
     // Validate file type
     if (!file.type.startsWith("video/")) {
       throw new Error("Please upload a video file");
     }
+
+    // Check if model is ready
+    const isModelReady = await this.checkModelStatus();
+    if (!isModelReady) {
+      throw new Error("Model server is not ready");
+    }
+
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch("http://localhost:8000/analyze", {
+    const response = await fetch(`${this.API_URL}/analyze`, {
       method: "POST",
       body: formData,
     });
 
     if (!response.ok) {
-      throw new Error("Analysis failed");
+      const error = await response.json();
+      throw new Error(error.detail || "Analysis failed");
     }
 
-    return response.json();
+    // Start progress simulation for different stages
+    let progress = 0;
+    const updateProgress = setInterval(() => {
+      progress += 2;
+      if (progress <= 30) {
+        onProgress?.("extract_frames", progress * 3.33);
+      } else if (progress <= 60) {
+        onProgress?.("detect_faces", (progress - 30) * 3.33);
+      } else if (progress <= 90) {
+        onProgress?.("analyze", (progress - 60) * 3.33);
+      } else {
+        clearInterval(updateProgress);
+      }
+    }, 100);
+
+    const result = await response.json();
+    clearInterval(updateProgress);
+    return result;
   }
 
   public async analyzeVideo(
     file: File,
-    onProgress?: (progress: number) => void,
+    onProgress?: (stage: string, progress: number) => void,
   ): Promise<VideoAnalysisResult> {
     if (!file) {
       throw new Error("No file provided");
     }
 
     try {
-      // Start progress indication
-      onProgress?.(0);
-
-      // Send video to server for analysis
-      const result = await this.sendVideoForAnalysis(file);
-
-      // Complete progress
-      onProgress?.(100);
-
-      return result;
+      return await this.sendVideoForAnalysis(file, onProgress);
     } catch (error) {
       console.error("Video analysis failed:", error);
       throw error;
