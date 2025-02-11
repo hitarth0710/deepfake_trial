@@ -16,6 +16,26 @@ export default function Analyze() {
 
   const handleAnalyze = async () => {
     if (!file) return;
+
+    try {
+      setAnalyzing(true);
+      setProgress(0);
+
+      const analysisResult = await videoAnalyzer.analyzeVideo(
+        file,
+        (progress) => {
+          setProgress(progress);
+        },
+      );
+
+      setResult(analysisResult);
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      // Show error to user
+    } finally {
+      setAnalyzing(false);
+    }
+    if (!file) return;
     setAnalyzing(true);
 
     try {

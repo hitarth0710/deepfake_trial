@@ -1,8 +1,8 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import cv2
 import numpy as np
-from model_handler import DeepfakeDetector
+from predictor import DeepfakePredictor
 import tempfile
 import os
 
@@ -11,17 +11,20 @@ app = FastAPI()
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your frontend URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize model
-detector = DeepfakeDetector()
+# Initialize predictor
+predictor = DeepfakePredictor()
 
 @app.post("/analyze")
 async def analyze_video(file: UploadFile = File(...)):
+    if not file.filename.lower().endswith(('.mp4', '.avi', '.mov')):
+        raise HTTPException(status_code=400, detail="Only video files are allowed")
+        
     # Save uploaded file temporarily
     with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as temp_file:
         content = await file.read()
@@ -41,10 +44,16 @@ async def analyze_video(file: UploadFile = File(...)):
             frames.append(frame)
         cap.release()
 
+        if not frames:
+            raise HTTPException(status_code=400, detail="Could not read video file")
+
         # Analyze frames
-        results = detector.analyze_video_frames(frames)
-        
-        return results
+        try:
+            results = predictor.predict_frames(frames)
+            return results
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+            
     finally:
         # Cleanup
         os.unlink(temp_path)

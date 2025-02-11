@@ -15,6 +15,7 @@ interface VideoAnalysisResult {
 }
 
 export class VideoAnalyzer {
+  private API_URL = "http://localhost:8000";
   constructor() {
     // Initialize any required resources
   }
@@ -61,6 +62,10 @@ export class VideoAnalyzer {
   }
 
   private async sendVideoForAnalysis(file: File): Promise<VideoAnalysisResult> {
+    // Validate file type
+    if (!file.type.startsWith("video/")) {
+      throw new Error("Please upload a video file");
+    }
     const formData = new FormData();
     formData.append("file", file);
 
