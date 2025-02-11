@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Shield, Loader2, FileAudio, FileText } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Shield, Loader2 } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
 import { FileUploadZone } from "@/components/upload/FileUploadZone";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { videoAnalyzer } from "@/lib/ai/video-analysis";
+import { VideoAnalysisResult } from "./analysis/VideoAnalysisResult";
 import Navbar from "./navbar";
 import Footer from "./footer";
 
@@ -12,24 +12,25 @@ export default function Analyze() {
   const [file, setFile] = useState<File | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [activeTab, setActiveTab] = useState<"video" | "audio" | "text">(
-    "video",
-  );
+  const [result, setResult] = useState<any>(null);
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!file) return;
     setAnalyzing(true);
 
-    // Simulate analysis progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 5;
-      setProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        setAnalyzing(false);
-      }
-    }, 500);
+    try {
+      const analysisResult = await videoAnalyzer.analyzeVideo(
+        file,
+        (progress) => {
+          setProgress(progress);
+        },
+      );
+      setResult(analysisResult);
+    } catch (error) {
+      console.error("Analysis failed:", error);
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   return (
@@ -55,11 +56,20 @@ export default function Analyze() {
             <Button
               size="lg"
               onClick={handleAnalyze}
-              className="w-full md:w-auto"
+              className="w-full md:w-auto mt-8"
             >
-              Start Analysis
+              {analyzing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                "Start Analysis"
+              )}
             </Button>
           )}
+
+          {result && <VideoAnalysisResult result={result} />}
         </div>
       </div>
       <Footer />
