@@ -22,8 +22,10 @@ class DeepfakeClassifier(nn.Module):
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
         )
-        self.lstm = nn.LSTM(2048, 512, batch_first=True)
-        self.linear1 = nn.Linear(512, 2)
+        # Update LSTM dimensions to match the saved model
+        hidden_size = 2048  # Changed from 512 to 2048
+        self.lstm = nn.LSTM(2048, hidden_size, batch_first=True)
+        self.linear1 = nn.Linear(hidden_size, 2)  # Changed input size to match LSTM output
 
     def _make_layer(self, in_channels, out_channels, blocks):
         layers = []
