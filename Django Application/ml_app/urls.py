@@ -1,9 +1,7 @@
 from django.urls import path
+from django.views.decorators.csrf import csrf_exempt
 from . import views
-from .api import VideoAnalysisAPI
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('predict/', views.predict, name='predict'),
-    path('api/analyze/', VideoAnalysisAPI.as_view(), name='video_analysis_api'),
+    path('api/analyze/', csrf_exempt(views.analyze_video), name='analyze_video'),
 ]
