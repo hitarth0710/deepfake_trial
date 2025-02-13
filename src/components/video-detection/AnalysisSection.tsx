@@ -32,6 +32,44 @@ const AnalysisSection = ({
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-1">
           <VideoPlayer src={videoUrl} onTimeUpdate={handleTimeUpdate} />
+          {detectionResult && (
+            <div
+              className={`mt-4 p-4 rounded-lg ${detectionResult === "REAL" ? "bg-green-100" : "bg-red-100"}`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Analysis Results
+                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <Badge
+                      variant={
+                        detectionResult === "FAKE" ? "destructive" : "success"
+                      }
+                      className="flex items-center gap-1"
+                    >
+                      {detectionResult === "FAKE" ? (
+                        <AlertCircle className="h-4 w-4" />
+                      ) : (
+                        <CheckCircle2 className="h-4 w-4" />
+                      )}
+                      {detectionResult === "FAKE"
+                        ? "Likely Deepfake"
+                        : "Likely Authentic"}
+                    </Badge>
+                  </div>
+                </div>
+                {confidenceScore && (
+                  <div className="text-right">
+                    <span className="text-sm text-gray-600">Confidence</span>
+                    <div className="text-2xl font-bold">
+                      {confidenceScore.toFixed(1)}%
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <Card className="flex-1 p-6 bg-white">

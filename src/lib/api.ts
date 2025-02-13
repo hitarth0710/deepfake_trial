@@ -20,9 +20,11 @@ export const api = {
 
       const data = await response.json();
       return {
-        result: data.result,
-        confidence: data.confidence,
+        result: data.result as "REAL" | "FAKE",
+        confidence: parseFloat(data.confidence.toFixed(2)),
         frames: data.frames || [],
+        video_url: data.video_url,
+        filename: data.filename,
       };
     } catch (error) {
       console.error("Error analyzing video:", error);

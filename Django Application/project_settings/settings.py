@@ -114,6 +114,13 @@ STATIC_ROOT = "/home/app/staticfiles/"
 #url for static files
 STATIC_URL = '/static/'
 
+# Media files configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Directory for uploaded videos
+UPLOAD_VIDEO_DIR = os.path.join(MEDIA_ROOT, 'uploaded_videos')
+
 STATICFILES_DIRS = [
     os.path.join(PROJECT_DIR, 'uploaded_images'),
     os.path.join(PROJECT_DIR, 'static'),

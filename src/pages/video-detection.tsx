@@ -11,6 +11,8 @@ const VideoDetectionPage = () => {
     result?: "REAL" | "FAKE";
     confidence?: number;
     frames?: string[];
+    video_url?: string;
+    filename?: string;
   }>({});
 
   const handleFileSelect = async (file: File) => {
