@@ -13,7 +13,7 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed top-0 w-full border-b bg-background/80 backdrop-blur-sm z-50">
+    <nav className="fixed top-0 w-full border-b bg-background/60 backdrop-blur-md z-50">
       <div className="container flex h-16 items-center justify-between">
         <Link
           to="/"

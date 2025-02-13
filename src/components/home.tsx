@@ -8,13 +8,11 @@ import {
   Zap,
   Lock,
   Users,
-  BarChart,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./navbar";
-import Footer from "./footer";
+import { Layout } from "./layout";
 
-function Home() {
+export default function Home() {
   const navigate = useNavigate();
 
   const features = [
@@ -48,9 +46,7 @@ function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-
+    <Layout>
       {/* Hero Section */}
       <section className="container pt-32 pb-20">
         <div className="relative">
@@ -68,17 +64,15 @@ function Home() {
               <Button
                 size="lg"
                 className="group"
-                onClick={() => navigate("/register")}
+                onClick={() => navigate("/analyze")}
               >
-                Start Free Trial
+                Start Detection
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() =>
-                  window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-                }
+                onClick={() => navigate("/docs")}
               >
                 <Play className="mr-2 h-5 w-5" />
                 Watch Demo
@@ -111,40 +105,6 @@ function Home() {
           ))}
         </div>
 
-        {/* How It Works */}
-        <div className="max-w-4xl mx-auto text-center mb-20">
-          <h2 className="text-3xl font-bold mb-12">How MaskOff Works</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                <span className="text-xl font-bold">1</span>
-              </div>
-              <h3 className="font-semibold">Upload content</h3>
-              <p className="text-muted-foreground">
-                Upload any content for analysis
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                <span className="text-xl font-bold">2</span>
-              </div>
-              <h3 className="font-semibold">AI Analysis</h3>
-              <p className="text-muted-foreground">
-                Our AI analyzes every type of manipulation
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                <span className="text-xl font-bold">3</span>
-              </div>
-              <h3 className="font-semibold">Get Results</h3>
-              <p className="text-muted-foreground">
-                Receive detailed analysis report
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Trust Indicators */}
         <div className="text-center mb-20">
           <p className="text-sm font-medium text-muted-foreground mb-6">
@@ -169,33 +129,7 @@ function Home() {
             ))}
           </div>
         </div>
-
-        {/* CTA Section */}
-        <div className="text-center max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Get Started?
-          </h2>
-          <p className="text-muted-foreground mb-8">
-            Join thousands of companies using MaskOff to protect their content
-            and verify authenticity.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" onClick={() => navigate("/register")}>
-              Start Free Trial
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => navigate("/docs")}
-            >
-              View Documentation
-            </Button>
-          </div>
-        </div>
       </section>
-      <Footer />
-    </div>
+    </Layout>
   );
 }
-
-export default Home;
