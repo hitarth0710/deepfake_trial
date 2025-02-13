@@ -16,12 +16,28 @@ const UploadSection = ({
   maxFileSize = 100 * 1024 * 1024, // 100MB
 }: UploadSectionProps) => {
   const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
+    async (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
-        onFileSelect(acceptedFiles[0]);
+        const file = acceptedFiles[0];
+
+        // Validate file size
+        if (file.size > maxFileSize) {
+          alert(
+            `File size must be less than ${Math.floor(maxFileSize / (1024 * 1024))}MB`,
+          );
+          return;
+        }
+
+        // Validate file type
+        if (!acceptedFileTypes.some((type) => file.type.includes(type))) {
+          alert("Invalid file type. Please upload a video file.");
+          return;
+        }
+
+        onFileSelect(file);
       }
     },
-    [onFileSelect],
+    [onFileSelect, maxFileSize, acceptedFileTypes],
   );
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } =

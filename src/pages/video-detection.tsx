@@ -1,43 +1,32 @@
 import React, { useState } from "react";
 import UploadSection from "@/components/video-detection/UploadSection";
 import AnalysisSection from "@/components/video-detection/AnalysisSection";
+import { api } from "@/lib/api";
 
 const VideoDetectionPage = () => {
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState<{
+    result?: "REAL" | "FAKE";
+    confidence?: number;
+    frames?: string[];
+  }>({});
 
   const handleFileSelect = async (file: File) => {
-    setSelectedVideo(file);
-    const url = URL.createObjectURL(file);
-    setVideoUrl(url);
-    setIsAnalyzing(true);
-
     try {
-      const formData = new FormData();
-      formData.append("video", file);
-      formData.append("sequence_length", "20");
+      setSelectedVideo(file);
+      const url = URL.createObjectURL(file);
+      setVideoUrl(url);
+      setIsAnalyzing(true);
 
-      const response = await fetch(config.modelEndpoint, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Analysis failed");
-      }
-
-      const data = await response.json();
-      setIsAnalyzing(false);
-
-      // Update UI with results
-      setAnalysisResults({
-        result: data.result,
-        confidence: data.confidence,
-        frames: data.frames || [],
-      });
+      // Use the api function to analyze the video
+      const results = await api.analyzeVideo(file);
+      setAnalysisResults(results);
     } catch (error) {
       console.error("Error analyzing video:", error);
+      alert(error instanceof Error ? error.message : "Failed to analyze video");
+    } finally {
       setIsAnalyzing(false);
     }
   };
@@ -60,8 +49,8 @@ const VideoDetectionPage = () => {
           <AnalysisSection
             videoUrl={videoUrl || undefined}
             isAnalyzing={isAnalyzing}
-            confidenceScore={85}
-            detectionResult="fake"
+            confidenceScore={analysisResults.confidence}
+            detectionResult={analysisResults.result}
           />
         )}
       </div>

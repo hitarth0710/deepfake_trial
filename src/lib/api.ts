@@ -10,10 +10,12 @@ export const api = {
       const response = await fetch(`${config.apiUrl}/ml_app/api/analyze/`, {
         method: "POST",
         body: formData,
+        // Important: Don't set Content-Type header, let the browser set it with boundary
       });
 
       if (!response.ok) {
-        throw new Error("Analysis failed");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Analysis failed");
       }
 
       const data = await response.json();
