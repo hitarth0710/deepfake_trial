@@ -9,14 +9,63 @@ from pathlib import Path
 class DeepfakeClassifier(nn.Module):
     def __init__(self):
         super(DeepfakeClassifier, self).__init__()
-        # Use ResNet50 without pretrained weights for older torchvision versions
-        self.base_model = models.resnet50(pretrained=False)
-        # Modify the final layer for binary classification
-        num_features = self.base_model.fc.in_features
-        self.base_model.fc = nn.Linear(num_features, 2)  # 2 classes: real and fake
+        # Define the model architecture to match the saved state dict
+        self.model = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3),  # First conv layer
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            self._make_layer(64, 256, 3),   # Layer 4
+            self._make_layer(256, 512, 4),   # Layer 5
+            self._make_layer(512, 1024, 6),  # Layer 6
+            self._make_layer(1024, 2048, 3), # Layer 7
+            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.Flatten(),
+        )
+        self.lstm = nn.LSTM(2048, 512, batch_first=True)
+        self.linear1 = nn.Linear(512, 2)
+
+    def _make_layer(self, in_channels, out_channels, blocks):
+        layers = []
+        # First block with downsample
+        downsample = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, 1, stride=2),
+            nn.BatchNorm2d(out_channels)
+        )
+        layers.append(self._make_bottleneck(in_channels, out_channels, 2, downsample))
+        
+        # Remaining blocks
+        for _ in range(1, blocks):
+            layers.append(self._make_bottleneck(out_channels, out_channels, 1))
+        
+        return nn.Sequential(*layers)
+
+    def _make_bottleneck(self, in_channels, out_channels, stride=1, downsample=None):
+        return nn.Sequential(
+            nn.Conv2d(in_channels, out_channels//4, 1, bias=False),
+            nn.BatchNorm2d(out_channels//4),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_channels//4, out_channels//4, 3, stride=stride, padding=1, bias=False),
+            nn.BatchNorm2d(out_channels//4),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_channels//4, out_channels, 1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            downsample if downsample is not None else nn.Identity(),
+            nn.ReLU(inplace=True)
+        )
 
     def forward(self, x):
-        return self.base_model(x)
+        # CNN features
+        features = self.model(x)
+        # Reshape for LSTM
+        features = features.unsqueeze(1)  # Add sequence dimension
+        # LSTM
+        lstm_out, _ = self.lstm(features)
+        # Take the last output
+        lstm_out = lstm_out[:, -1, :]
+        # Final classification
+        out = self.linear1(lstm_out)
+        return out
 
 class DeepfakeDetector:
     def __init__(self):
@@ -44,14 +93,13 @@ class DeepfakeDetector:
             # Load state dictionary
             state_dict = torch.load(model_path, map_location=self.device)
             
-            # Check if we have a state dict or full model
+            # If the state dict was saved with DataParallel, remove the 'module.' prefix
             if isinstance(state_dict, dict):
-                # If the state dict was saved with DataParallel, remove the 'module.' prefix
                 if any(k.startswith('module.') for k in state_dict.keys()):
                     state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
                 model.load_state_dict(state_dict)
             else:
-                model = state_dict  # If it's a full model
+                model = state_dict
             
             # Move model to device and set to evaluation mode
             model = model.to(self.device)
