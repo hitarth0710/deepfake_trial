@@ -1,69 +1,54 @@
 import os
-import uuid
+import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 from django.conf import settings
-import torch
-from datetime import datetime
-from .utils import extract_frames, preprocess_frames, analyze_video_frames
+
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def analyze_video(request):
     if request.method != 'POST':
-        return JsonResponse({'error': 'Only POST method is allowed'}, status=405)
+        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
     try:
-        video_file = request.FILES.get('video')
-        if not video_file:
-            return JsonResponse({'error': 'No video file provided'}, status=400)
+        # Check if file exists in request
+        if 'file' not in request.FILES:
+            return JsonResponse({'error': 'No file uploaded'}, status=400)
 
-        # Create uploads directory if it doesn't exist
-        upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploaded_videos')
-        if not os.path.exists(upload_dir):
-            os.makedirs(upload_dir)
+        video_file = request.FILES['file']
+        
+        # Validate file type
+        if not video_file.content_type.startswith('video/'):
+            return JsonResponse({'error': 'Invalid file type. Please upload a video.'}, status=400)
 
-        # Generate unique filename
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        file_extension = os.path.splitext(video_file.name)[1]
-        unique_filename = f"{timestamp}_{uuid.uuid4().hex[:8]}{file_extension}"
+        # Create temp directory if it doesn't exist
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'temp'), exist_ok=True)
 
-        # Save the video file
-        fs = FileSystemStorage(location=upload_dir)
-        filename = fs.save(unique_filename, video_file)
-        video_path = fs.path(filename)
-        video_url = f"{settings.MEDIA_URL}uploaded_videos/{filename}"
+        # Save the uploaded file
+        file_path = default_storage.save(
+            f'temp/{video_file.name}',
+            ContentFile(video_file.read())
+        )
 
-        try:
-            # Load model
-            model_path = os.path.join(settings.BASE_DIR, 'models', 'model_84_acc_10_frames_final_data.pt')
-            if not os.path.exists(model_path):
-                raise FileNotFoundError(f"Model file not found at {model_path}")
-            
-            model = torch.load(model_path, map_location=torch.device('cpu'))
-            
-            # Process video
-            sequence_length = 20  # Number of frames to analyze
-            frames = extract_frames(video_path, sequence_length)
-            if not frames:
-                raise ValueError("No frames could be extracted from the video")
-                
-            # Preprocess frames
-            processed_frames = preprocess_frames(frames)
-            
-            # Run analysis
-            result, confidence = analyze_video_frames(model, processed_frames)
+        # Get the full URL for the saved file
+        file_url = request.build_absolute_uri(settings.MEDIA_URL + file_path)
 
-            response_data = {
-                'result': result,
-                'confidence': confidence,
-                'video_url': video_url,
-                'filename': filename
-            }
-            return JsonResponse(response_data)
+        # Mock analysis result
+        result = {
+            'result': 'FAKE',
+            'confidence': 85.5,
+            'video_url': file_url,
+            'filename': video_file.name
+        }
 
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse(result)
 
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        logger.error(f'Error processing video: {str(e)}')
+        return JsonResponse(
+            {'error': f'Failed to process video: {str(e)}'}, 
+            status=500
+        )

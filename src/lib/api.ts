@@ -1,7 +1,7 @@
 export const api = {
   async analyzeVideo(file: File, onProgress?: (progress: number) => void) {
     const formData = new FormData();
-    formData.append("video", file);
+    formData.append("file", file);
 
     try {
       const response = await fetch(
@@ -12,12 +12,12 @@ export const api = {
         },
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Analysis failed");
+        throw new Error(data.error || "Analysis failed");
       }
 
-      const data = await response.json();
       return {
         result: data.result as "REAL" | "FAKE",
         confidence: parseFloat(data.confidence.toFixed(2)),
@@ -26,7 +26,9 @@ export const api = {
       };
     } catch (error) {
       console.error("Error analyzing video:", error);
-      throw error;
+      throw new Error(
+        error instanceof Error ? error.message : "Failed to analyze video",
+      );
     }
   },
 };
