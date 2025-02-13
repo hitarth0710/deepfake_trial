@@ -10,6 +10,18 @@ from .models.detector2 import DeepfakeDetector
 # Initialize the detector
 detector = DeepfakeDetector()
 
+def convert_to_serializable(obj):
+    """Convert numpy types to Python native types for JSON serialization."""
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    return obj
+
 @csrf_exempt
 def analyze_video(request):
     if request.method != 'POST':
@@ -54,16 +66,19 @@ def analyze_video(request):
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
-        # Format response to match frontend expectations
+        # Convert numpy types to Python native types
         response_data = {
             'result': result['result'],
-            'confidence': result['confidence'],
-            'frame_predictions': result['frame_predictions'],
-            'faces_detected': result['faces_detected'],
-            'total_frames': result['total_frames'],
-            'frames_with_faces': result['frames_with_faces'],
+            'confidence': float(result['confidence']),
+            'frame_predictions': [
+                [bool(pred), float(conf)] 
+                for pred, conf in result['frame_predictions']
+            ],
+            'faces_detected': [bool(x) for x in result['faces_detected']],
+            'total_frames': int(result['total_frames']),
+            'frames_with_faces': int(result['frames_with_faces']),
             'filename': video_file.name,
-            'video_url': None  # We don't store the video
+            'video_url': None
         }
 
         return JsonResponse(response_data)
