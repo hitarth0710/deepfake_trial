@@ -8,22 +8,41 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 import logging
+from .models.deepfake_detector import DeepfakeDetector
+
+# Initialize the detector
+detector = DeepfakeDetector()
 
 logger = logging.getLogger(__name__)
 
-def extract_frames_and_faces(video_path):
+def extract_frames_and_analyze(video_path):
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     frames = []
     face_frames = []
+    analysis_frames = []
     
     # Load face detection model
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
     
-    # We want exactly 8 frames for display
-    frame_indices = np.linspace(0, total_frames - 1, 8, dtype=int)
+    # Extract 100 frames for analysis and 8 frames for display
+    analysis_indices = np.linspace(0, total_frames - 1, 100, dtype=int)
+    display_indices = np.linspace(0, total_frames - 1, 8, dtype=int)
     
-    for frame_idx in frame_indices:
+    # First pass: collect frames for analysis
+    for frame_idx in analysis_indices:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+        ret, frame = cap.read()
+        if not ret:
+            break
+        analysis_frames.append(frame)
+    
+    # Run deepfake detection
+    analysis_result = detector.analyze_video(analysis_frames)
+    
+    # Second pass: collect frames for display
+    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    for frame_idx in display_indices:
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
         ret, frame = cap.read()
         if not ret:
@@ -61,7 +80,7 @@ def extract_frames_and_faces(video_path):
         frames.append(f'data:image/jpeg;base64,{frame_b64}')
     
     cap.release()
-    return frames, face_frames
+    return frames, face_frames, analysis_result
 
 @csrf_exempt
 def analyze_video(request):
@@ -89,16 +108,16 @@ def analyze_video(request):
         
         full_path = os.path.join(settings.MEDIA_ROOT, file_path)
         
-        # Extract frames and face crops
-        frames, face_frames = extract_frames_and_faces(full_path)
+        # Extract frames, face crops and run analysis
+        frames, face_frames, analysis_result = extract_frames_and_analyze(full_path)
 
         # Get the full URL for the saved file
         file_url = request.build_absolute_uri(settings.MEDIA_URL + file_path)
 
-        # Mock analysis result
+        # Combine results
         result = {
-            'result': 'REAL',
-            'confidence': 95.5,
+            'result': analysis_result['result'],
+            'confidence': analysis_result['confidence'],
             'video_url': file_url,
             'filename': video_file.name,
             'frames': frames,
