@@ -23,7 +23,7 @@ def analyze_video(request):
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)
 
-        # Generate unique filename with timestamp
+        # Generate unique filename
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         file_extension = os.path.splitext(video_file.name)[1]
         unique_filename = f"{timestamp}_{uuid.uuid4().hex[:8]}{file_extension}"
@@ -35,9 +35,6 @@ def analyze_video(request):
         video_url = f"{settings.MEDIA_URL}uploaded_videos/{filename}"
 
         try:
-            # Get sequence length from request or use default
-            sequence_length = int(request.POST.get('sequence_length', 20))
-
             # Load model
             model_path = os.path.join(settings.BASE_DIR, 'models', 'model_84_acc_10_frames_final_data.pt')
             if not os.path.exists(model_path):
@@ -46,6 +43,7 @@ def analyze_video(request):
             model = torch.load(model_path, map_location=torch.device('cpu'))
             
             # Process video
+            sequence_length = 20  # Number of frames to analyze
             frames = extract_frames(video_path, sequence_length)
             if not frames:
                 raise ValueError("No frames could be extracted from the video")
@@ -59,18 +57,13 @@ def analyze_video(request):
             response_data = {
                 'result': result,
                 'confidence': confidence,
-                'frames': [],  # Add processed frame data if needed
-                'video_url': video_url,  # URL to access the stored video
+                'video_url': video_url,
                 'filename': filename
             }
-
             return JsonResponse(response_data)
 
         except Exception as e:
-            # If there's an error during processing, we might want to clean up
-            if os.path.exists(video_path):
-                os.remove(video_path)
-            raise e
+            return JsonResponse({'error': str(e)}, status=500)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
