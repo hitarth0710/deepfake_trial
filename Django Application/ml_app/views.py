@@ -1,12 +1,67 @@
 import os
-import logging
+import cv2
+import base64
+import numpy as np
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
+import logging
 
 logger = logging.getLogger(__name__)
+
+def extract_frames_and_faces(video_path):
+    cap = cv2.VideoCapture(video_path)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    frames = []
+    face_frames = []
+    
+    # Load face detection model
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    
+    # We want exactly 8 frames for display
+    frame_indices = np.linspace(0, total_frames - 1, 8, dtype=int)
+    
+    for frame_idx in frame_indices:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+        ret, frame = cap.read()
+        if not ret:
+            break
+            
+        # Convert frame to RGB
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+        # Detect faces
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        
+        # Get face crop if face detected
+        if len(faces) > 0:
+            x, y, w, h = faces[0]
+            # Add padding around face
+            padding = int(w * 0.3)
+            x = max(0, x - padding)
+            y = max(0, y - padding)
+            w = min(frame.shape[1] - x, w + 2 * padding)
+            h = min(frame.shape[0] - y, h + 2 * padding)
+            
+            face_crop = frame_rgb[y:y+h, x:x+w]
+            face_crop = cv2.resize(face_crop, (100, 100))
+            
+            # Convert face crop to base64
+            _, buffer = cv2.imencode('.jpg', cv2.cvtColor(face_crop, cv2.COLOR_RGB2BGR))
+            face_b64 = base64.b64encode(buffer).decode('utf-8')
+            face_frames.append(f'data:image/jpeg;base64,{face_b64}')
+        
+        # Resize and convert frame to base64
+        frame_resized = cv2.resize(frame_rgb, (320, 180))  # 16:9 aspect ratio
+        _, buffer = cv2.imencode('.jpg', cv2.cvtColor(frame_resized, cv2.COLOR_RGB2BGR))
+        frame_b64 = base64.b64encode(buffer).decode('utf-8')
+        frames.append(f'data:image/jpeg;base64,{frame_b64}')
+    
+    cap.release()
+    return frames, face_frames
 
 @csrf_exempt
 def analyze_video(request):
@@ -14,7 +69,6 @@ def analyze_video(request):
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
     try:
-        # Check if file exists in request
         if 'file' not in request.FILES:
             return JsonResponse({'error': 'No file uploaded'}, status=400)
 
@@ -32,17 +86,28 @@ def analyze_video(request):
             f'temp/{video_file.name}',
             ContentFile(video_file.read())
         )
+        
+        full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+        
+        # Extract frames and face crops
+        frames, face_frames = extract_frames_and_faces(full_path)
 
         # Get the full URL for the saved file
         file_url = request.build_absolute_uri(settings.MEDIA_URL + file_path)
 
         # Mock analysis result
         result = {
-            'result': 'FAKE',
-            'confidence': 85.5,
+            'result': 'REAL',
+            'confidence': 95.5,
             'video_url': file_url,
-            'filename': video_file.name
+            'filename': video_file.name,
+            'frames': frames,
+            'faceFrames': face_frames
         }
+
+        # Clean up the temporary file
+        if os.path.exists(full_path):
+            os.remove(full_path)
 
         return JsonResponse(result)
 

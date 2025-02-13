@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { api } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import UploadSection from "./UploadSection";
 import AnalysisSection from "./AnalysisSection";
+import { FramesDisplay } from "./FramesDisplay";
+import { Card } from "@/components/ui/card";
+import { ThumbsUp } from "lucide-react";
 
 export function VideoAnalysis() {
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
@@ -12,17 +17,24 @@ export function VideoAnalysis() {
     confidence?: number;
     video_url?: string;
     filename?: string;
+    frames?: string[];
+    faceFrames?: string[];
   }>({});
 
-  const handleFileSelect = async (file: File) => {
+  const handleFileSelect = (file: File) => {
+    setSelectedVideo(file);
+    const url = URL.createObjectURL(file);
+    setVideoUrl(url);
+  };
+
+  const handleStartAnalysis = async () => {
+    if (!selectedVideo) return;
+
     try {
-      setSelectedVideo(file);
-      const url = URL.createObjectURL(file);
-      setVideoUrl(url);
       setIsAnalyzing(true);
 
       // Call the API to analyze the video
-      const results = await api.analyzeVideo(file);
+      const results = await api.analyzeVideo(selectedVideo);
       setAnalysisResults(results);
     } catch (error) {
       console.error("Error analyzing video:", error);
@@ -46,15 +58,76 @@ export function VideoAnalysis() {
 
         <UploadSection onFileSelect={handleFileSelect} />
 
-        {(videoUrl || isAnalyzing) && (
-          <AnalysisSection
-            videoUrl={videoUrl || undefined}
-            isAnalyzing={isAnalyzing}
-            confidenceScore={analysisResults.confidence}
-            detectionResult={
-              analysisResults.result?.toLowerCase() as "real" | "fake"
-            }
-          />
+        {videoUrl && (
+          <div className="space-y-6">
+            {!analysisResults.result && (
+              <div className="flex justify-center">
+                <Button
+                  size="lg"
+                  onClick={handleStartAnalysis}
+                  disabled={isAnalyzing}
+                  className="w-full md:w-auto"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    "Start Analysis"
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {isAnalyzing && (
+              <div className="space-y-6">
+                {analysisResults.frames && (
+                  <FramesDisplay
+                    frames={analysisResults.frames}
+                    title="Frames Split"
+                  />
+                )}
+                {analysisResults.faceFrames && (
+                  <FramesDisplay
+                    frames={analysisResults.faceFrames}
+                    title="Face Cropped Frames"
+                  />
+                )}
+              </div>
+            )}
+
+            {analysisResults.result && (
+              <div className="space-y-6">
+                <AnalysisSection
+                  videoUrl={videoUrl}
+                  isAnalyzing={false}
+                  confidenceScore={analysisResults.confidence}
+                  detectionResult={
+                    analysisResults.result?.toLowerCase() as "real" | "fake"
+                  }
+                />
+
+                <Card className="p-6 text-center">
+                  <div className="flex items-center justify-center space-x-2 text-2xl font-bold">
+                    <span>Result: </span>
+                    <span
+                      className={
+                        analysisResults.result === "REAL"
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }
+                    >
+                      {analysisResults.result}
+                    </span>
+                    {analysisResults.result === "REAL" && (
+                      <ThumbsUp className="h-8 w-8 text-green-600" />
+                    )}
+                  </div>
+                </Card>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
