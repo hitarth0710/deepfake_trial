@@ -19,6 +19,10 @@ export function VideoAnalysis() {
     filename?: string;
     frames?: string[];
     faceFrames?: string[];
+    frame_predictions?: Array<[boolean, number]>;
+    faces_detected?: boolean[];
+    total_frames?: number;
+    frames_with_faces?: number;
   }>({});
 
   const handleFileSelect = (file: File) => {

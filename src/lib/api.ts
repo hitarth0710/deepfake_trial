@@ -23,6 +23,10 @@ export const api = {
         confidence: parseFloat(data.confidence.toFixed(2)),
         video_url: data.video_url,
         filename: data.filename,
+        frame_predictions: data.frame_predictions,
+        faces_detected: data.faces_detected,
+        total_frames: data.total_frames,
+        frames_with_faces: data.frames_with_faces,
       };
     } catch (error) {
       console.error("Error analyzing video:", error);
