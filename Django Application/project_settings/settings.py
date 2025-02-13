@@ -28,6 +28,8 @@ ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     'corsheaders',
+    'ml_app',
+    'corsheaders',
     'corsheaders',
     'rest_framework',
     'corsheaders',
@@ -38,9 +40,14 @@ INSTALLED_APPS = [
     'ml_app.apps.MlAppConfig'
 ]
 
+# CORS settings
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
