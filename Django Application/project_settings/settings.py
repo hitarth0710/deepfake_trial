@@ -28,6 +28,7 @@ ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     'corsheaders',
+    'corsheaders',
     'rest_framework',
     'corsheaders',
     'django.contrib.contenttypes',
@@ -39,12 +40,22 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite dev server
+    "http://localhost:3000",  # For production build
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
