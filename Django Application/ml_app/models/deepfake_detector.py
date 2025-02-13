@@ -9,8 +9,8 @@ from pathlib import Path
 class DeepfakeClassifier(nn.Module):
     def __init__(self):
         super(DeepfakeClassifier, self).__init__()
-        # Use a pretrained ResNet as base
-        self.base_model = models.resnet50(weights=None)
+        # Use ResNet50 without pretrained weights for older torchvision versions
+        self.base_model = models.resnet50(pretrained=False)
         # Modify the final layer for binary classification
         num_features = self.base_model.fc.in_features
         self.base_model.fc = nn.Linear(num_features, 2)  # 2 classes: real and fake
