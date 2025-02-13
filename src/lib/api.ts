@@ -5,7 +5,7 @@ export const api = {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/ml_app/api/analyze/`,
+        `http://127.0.0.1:8000/ml_app/api/analyze/`,
         {
           method: "POST",
           body: formData,

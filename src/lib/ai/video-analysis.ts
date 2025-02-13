@@ -13,7 +13,7 @@ interface VideoAnalysisResult {
 }
 
 export class VideoAnalyzer {
-  private API_URL = "http://localhost:8000";
+  private API_URL = "http://127.0.0.1:8000";
 
   constructor() {
     // Initialize any required resources
