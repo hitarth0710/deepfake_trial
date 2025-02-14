@@ -1,16 +1,15 @@
+import { config } from "./config";
+
 export const api = {
   async analyzeVideo(file: File, onProgress?: (progress: number) => void) {
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/ml_app/api/analyze/`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+      const response = await fetch(config.endpoints.videoAnalysis, {
+        method: "POST",
+        body: formData,
+      });
 
       const data = await response.json();
 
@@ -33,6 +32,48 @@ export const api = {
       throw new Error(
         error instanceof Error ? error.message : "Failed to analyze video",
       );
+    }
+  },
+
+  async analyzeAudio(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(config.endpoints.audioAnalysis, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Audio analysis failed");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error analyzing audio:", error);
+      throw error;
+    }
+  },
+
+  async analyzeImage(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(config.endpoints.imageAnalysis, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Image analysis failed");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error analyzing image:", error);
+      throw error;
     }
   },
 };
