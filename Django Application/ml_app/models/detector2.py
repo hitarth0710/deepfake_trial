@@ -15,7 +15,7 @@ class DeepfakeDetector:
 
     def load_model(self):
         try:
-            model_path = Path(__file__).parent / 'deepfake_detector.h5'
+            model_path = Path(__file__).parent / 'cnn_model.h5'
             if not model_path.exists():
                 raise FileNotFoundError(f"Model file not found at {model_path}")
 
