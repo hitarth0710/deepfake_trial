@@ -36,8 +36,23 @@ MIDDLEWARE = [
 ]
 
 # CORS settings
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://dazzling-chaplygin1-j6rbl.dev-2.tempolabs.ai",
+]
+
+CORS_ALLOWED_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
+]
 
 ROOT_URLCONF = 'project_settings.urls'
 

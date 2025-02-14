@@ -55,6 +55,8 @@ def analyze_audio(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
+    print('Received audio analysis request')
+
     try:
         audio_file = request.FILES.get('file')
         if not audio_file:

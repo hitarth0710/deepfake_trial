@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api } from "@/lib/api";
+import { config } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -31,14 +31,28 @@ export function AudioAnalysis({
       setAnalyzing(true);
       setProgress(0);
 
-      // Call the API to analyze the audio
-      const response = await api.analyzeAudio(file, (progress) => {
-        setProgress(progress);
-      });
+      // Create form data for file upload
+      const formData = new FormData();
+      formData.append("file", file);
 
-      setResult(response);
+      // Call the API to analyze the audio
+      const response = await fetch(
+        `${config.apiUrl}${config.endpoints.audio}`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setResult(data);
+
       if (onAnalysisComplete) {
-        onAnalysisComplete(response);
+        onAnalysisComplete(data);
       }
     } catch (error) {
       console.error("Analysis failed:", error);
@@ -115,7 +129,6 @@ export function AudioAnalysis({
               <div className="space-y-2">
                 <h4 className="text-sm font-medium">Waveform Analysis</h4>
                 <div className="h-24 bg-muted rounded-md p-2">
-                  {/* Render waveform visualization here */}
                   <div className="h-full flex items-center">
                     {result.waveform_data.map((value, index) => (
                       <div
