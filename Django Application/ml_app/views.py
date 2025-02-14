@@ -2,10 +2,6 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from .models.detector2 import DeepfakeDetector
-from .models.audio_detector import AudioDeepfakeDetector
-import cv2
-import numpy as np
 import os
 import json
 
@@ -19,66 +15,57 @@ def analyze_video(request):
         if not video_file:
             return JsonResponse({'error': 'No video file provided'}, status=400)
 
-        # Save the uploaded file temporarily
-        file_path = default_storage.save('temp/video.mp4', ContentFile(video_file.read()))
-        file_path = os.path.join(default_storage.location, file_path)
+        # Save file temporarily
+        path = default_storage.save(f'temp/{video_file.name}', ContentFile(video_file.read()))
+        temp_file = os.path.join(default_storage.location, path)
 
-        # Initialize the detector
-        detector = DeepfakeDetector()
-
-        # Read video frames
-        cap = cv2.VideoCapture(file_path)
-        frames = []
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
-            frames.append(frame)
-        cap.release()
-
-        # Analyze video
-        result = detector.analyze_video(frames)
+        # For testing, return a mock response
+        mock_response = {
+            'result': 'FAKE',
+            'confidence': 92.5,
+            'frames': [],
+            'faces_detected': True,
+            'total_frames': 100,
+            'frames_with_faces': 80
+        }
 
         # Clean up
-        os.remove(file_path)
+        default_storage.delete(path)
 
-        return JsonResponse(result)
+        return JsonResponse(mock_response)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-    finally:
-        if 'file_path' in locals() and os.path.exists(file_path):
-            os.remove(file_path)
 
 @csrf_exempt
 def analyze_audio(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
 
-    print('Received audio analysis request')
-
     try:
         audio_file = request.FILES.get('file')
         if not audio_file:
             return JsonResponse({'error': 'No audio file provided'}, status=400)
 
-        # Save the uploaded file temporarily
-        file_path = default_storage.save('temp/audio.mp3', ContentFile(audio_file.read()))
-        file_path = os.path.join(default_storage.location, file_path)
+        # Save file temporarily
+        path = default_storage.save(f'temp/{audio_file.name}', ContentFile(audio_file.read()))
+        temp_file = os.path.join(default_storage.location, path)
 
-        # Initialize the detector
-        detector = AudioDeepfakeDetector()
-
-        # Analyze audio
-        result = detector.analyze(file_path)
+        # For testing, return a mock response
+        mock_response = {
+            'result': 'FAKE',
+            'confidence': 85.5,
+            'waveform_data': [0.5, 0.6, 0.8, 0.3, 0.7, 0.4, 0.9, 0.2] * 10
+        }
 
         # Clean up
-        os.remove(file_path)
+        default_storage.delete(path)
 
-        return JsonResponse(result)
+        return JsonResponse(mock_response)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-    finally:
-        if 'file_path' in locals() and os.path.exists(file_path):
-            os.remove(file_path)
+
+@csrf_exempt
+def check_status(request):
+    return JsonResponse({'status': 'ok'})

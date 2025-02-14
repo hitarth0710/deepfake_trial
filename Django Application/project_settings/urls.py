@@ -5,5 +5,5 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('ml_app/', include('ml_app.urls')),
+    path('', include('ml_app.urls')),  # Include ml_app URLs at root level
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

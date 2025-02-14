@@ -54,6 +54,18 @@ CORS_ALLOWED_METHODS = [
     'OPTIONS'
 ]
 
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
 ROOT_URLCONF = 'project_settings.urls'
 
 TEMPLATES = [
@@ -111,6 +123,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Ensure temp directory exists
+TEMP_DIR = os.path.join(MEDIA_ROOT, 'temp')
+os.makedirs(TEMP_DIR, exist_ok=True)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

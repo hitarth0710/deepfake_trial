@@ -1,9 +1,8 @@
 export const config = {
-  apiUrl:
-    import.meta.env.VITE_API_URL ||
-    "https://dazzling-chaplygin1-j6rbl.dev-2.tempolabs.ai",
+  apiUrl: "http://127.0.0.1:8000", // Django development server URL
   endpoints: {
     video: "/api/analyze/",
     audio: "/api/analyze-audio/",
+    status: "/api/status/",
   },
 };
