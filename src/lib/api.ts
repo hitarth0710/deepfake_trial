@@ -6,10 +6,13 @@ export const api = {
     formData.append("file", file);
 
     try {
-      const response = await fetch(config.endpoints.video, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${config.apiUrl}${config.endpoints.video}`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       const data = await response.json();
 
@@ -52,17 +55,27 @@ export const api = {
         }
       }, 100);
 
-      const response = await fetch(config.endpoints.audio, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${config.apiUrl}${config.endpoints.audio}`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       clearInterval(progressInterval);
-      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Analysis failed");
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Analysis failed");
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
       }
+
+      const data = await response.json();
 
       return {
         result: data.result as "REAL" | "FAKE",
