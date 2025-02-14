@@ -1,10 +1,21 @@
 import numpy as np
 import librosa
+from tensorflow.keras.models import load_model
+from pathlib import Path
+import logging
 
 class AudioDeepfakeDetector:
     def __init__(self):
-        # Initialize any models or resources needed
-        pass
+        try:
+            # Load the audio detection model
+            model_path = Path(__file__).parent / 'simple-cnn-ssv.h5'
+            if not model_path.exists():
+                raise FileNotFoundError(f"Model file not found at {model_path}")
+            self.model = load_model(str(model_path), compile=False)
+            logging.info("Audio detection model loaded successfully")
+        except Exception as e:
+            logging.error(f"Error initializing AudioDeepfakeDetector: {str(e)}")
+            raise
 
     def analyze(self, file_path):
         """Analyze an audio file for potential deepfake manipulation."""
@@ -18,10 +29,29 @@ class AudioDeepfakeDetector:
             spectral_rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)
             mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
 
-            # Simulate detection (replace with actual model inference)
-            # This is just an example - implement your actual detection logic
-            confidence = np.random.uniform(0.6, 0.9)
-            is_fake = confidence > 0.75
+            try:
+                # Normalize and reshape features
+                spectral_centroids = np.mean(spectral_centroids, axis=1)
+                spectral_rolloff = np.mean(spectral_rolloff, axis=1)
+                mfccs = np.mean(mfccs, axis=1)
+                
+                # Stack and prepare features
+                features = np.stack([spectral_centroids, spectral_rolloff, mfccs])
+                features = np.expand_dims(features, axis=0)
+                
+                # Ensure features are the right shape
+                if features.shape != self.model.input_shape:
+                    features = np.reshape(features, self.model.input_shape[1:])
+                    features = np.expand_dims(features, axis=0)
+                
+                # Get prediction from model
+                prediction = self.model.predict(features, verbose=0)
+                confidence = float(prediction[0][0])
+                is_fake = confidence > 0.5
+                logging.debug(f"Audio analysis complete - Confidence: {confidence}, Is Fake: {is_fake}")
+            except Exception as e:
+                logging.error(f"Error during feature extraction/prediction: {str(e)}")
+                raise
 
             # Generate waveform data for visualization
             waveform = y[::1000].tolist()  # Downsample for visualization
