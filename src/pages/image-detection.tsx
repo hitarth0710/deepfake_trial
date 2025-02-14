@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/lib/use-toast";
 import { useNavigate } from "react-router-dom";
 
-export default function VideoDetection() {
+export default function ImageDetection() {
   const [file, setFile] = useState<File | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -32,9 +32,9 @@ export default function VideoDetection() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      "video/*": [".mp4", ".webm", ".mov"],
+      "image/*": [".png", ".jpg", ".jpeg", ".webp"],
     },
-    maxSize: 100 * 1024 * 1024, // 100MB
+    maxSize: 20 * 1024 * 1024, // 20MB
     multiple: false,
   });
 
@@ -46,7 +46,7 @@ export default function VideoDetection() {
     if (!user) {
       toast({
         title: "Sign in required",
-        description: "Please sign in to analyze videos",
+        description: "Please sign in to analyze images",
         variant: "default",
       });
       navigate("/sign-in");
@@ -60,7 +60,7 @@ export default function VideoDetection() {
       setResult(null);
 
       // Send to backend
-      const response = await api.analyzeVideo(file);
+      const response = await api.analyzeImage(file);
       setResult(response);
     } catch (error) {
       console.error("Analysis failed:", error);
@@ -77,9 +77,9 @@ export default function VideoDetection() {
       <BackButton />
       <div className="container max-w-3xl pt-32 pb-20">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">Video Deepfake Detection</h1>
+          <h1 className="text-4xl font-bold mb-2">Image Deepfake Detection</h1>
           <p className="text-muted-foreground">
-            Upload a video to analyze it for potential deepfake manipulation
+            Upload an image to analyze it for potential AI manipulation
           </p>
         </div>
 
@@ -98,15 +98,15 @@ export default function VideoDetection() {
               <input {...getInputProps()} />
               <Upload className="h-10 w-10 text-gray-400 mb-4" />
               <p className="text-lg font-medium text-gray-900 mb-1">
-                {file ? file.name : "Drag & drop your video here"}
+                {file ? file.name : "Drag & drop your image here"}
               </p>
               <p className="text-gray-500 mb-4">or</p>
               <Button variant="outline" className="mb-4">
-                Select Video
+                Select Image
               </Button>
               <div className="text-center text-sm text-gray-500">
-                <p>Supported formats: MP4, WebM, QuickTime</p>
-                <p>Maximum file size: 100MB</p>
+                <p>Supported formats: PNG, JPG, JPEG, WebP</p>
+                <p>Maximum file size: 20MB</p>
               </div>
             </div>
 
@@ -123,7 +123,7 @@ export default function VideoDetection() {
           {analyzing && (
             <Card className="p-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Analyzing Video</h3>
+                <h3 className="text-lg font-semibold">Analyzing Image</h3>
                 <Progress value={progress} />
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -148,12 +148,12 @@ export default function VideoDetection() {
                     {result.result === "FAKE" ? (
                       <>
                         <AlertCircle className="w-4 h-4 mr-1" />
-                        Likely Deepfake
+                        AI Generated Image
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="w-4 h-4 mr-1" />
-                        Likely Authentic
+                        Natural Image
                       </>
                     )}
                   </Badge>

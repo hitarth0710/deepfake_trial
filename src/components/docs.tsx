@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Code, FileText } from "lucide-react";
+import { BookOpen, Code, FileText, FileType } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";
 import Navbar from "./navbar";
 import Footer from "./footer";
@@ -31,6 +31,10 @@ export default function Docs() {
               <TabsTrigger value="guides">
                 <FileText className="h-4 w-4 mr-2" />
                 Guides
+              </TabsTrigger>
+              <TabsTrigger value="presentations">
+                <FileType className="h-4 w-4 mr-2" />
+                Presentations
               </TabsTrigger>
             </TabsList>
 
@@ -71,6 +75,68 @@ export default function Docs() {
                   <li>Batch Processing Guide</li>
                   <li>Error Handling Best Practices</li>
                 </ul>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="presentations" className="space-y-6">
+              <div className="prose prose-slate dark:prose-invert max-w-none">
+                <h2>Project Presentations</h2>
+                <div className="grid gap-4">
+                  <div className="p-4 border rounded-lg hover:bg-accent">
+                    <h3 className="text-lg font-semibold mb-2">
+                      Project Overview
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Complete overview of the MaskOff project and its features
+                    </p>
+                    <Button variant="outline" asChild>
+                      <a
+                        href="https://docs.google.com/presentation/d/your-presentation-id"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <FileType className="h-4 w-4 mr-2" />
+                        View Presentation
+                      </a>
+                    </Button>
+                  </div>
+
+                  <div className="p-4 border rounded-lg hover:bg-accent">
+                    <h3 className="text-lg font-semibold mb-2">
+                      Technical Architecture
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Detailed technical overview of the system architecture
+                    </p>
+                    <Button variant="outline" asChild>
+                      <a
+                        href="https://docs.google.com/presentation/d/your-presentation-id"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <FileType className="h-4 w-4 mr-2" />
+                        View Presentation
+                      </a>
+                    </Button>
+                  </div>
+
+                  <div className="p-4 border rounded-lg hover:bg-accent">
+                    <h3 className="text-lg font-semibold mb-2">Project Demo</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Live demonstration of key features and capabilities
+                    </p>
+                    <Button variant="outline" asChild>
+                      <a
+                        href="https://docs.google.com/presentation/d/your-presentation-id"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <FileType className="h-4 w-4 mr-2" />
+                        View Presentation
+                      </a>
+                    </Button>
+                  </div>
+                </div>
               </div>
             </TabsContent>
           </Tabs>

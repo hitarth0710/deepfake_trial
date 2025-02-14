@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/lib/use-toast";
-import { supabase } from "@/lib/supabase";
 import { BackButton } from "@/components/ui/back-button";
 import Navbar from "../navbar";
 import Footer from "../footer";
 import { z } from "zod";
+import { signUp } from "@/lib/auth";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -36,31 +36,33 @@ export default function Register() {
     setError("");
 
     try {
+      // Validate input
       schema.parse({ email, password });
+
+      // Attempt signup
+      const { error: signUpError } = await signUp(email, password);
+
+      if (signUpError) {
+        setError(signUpError.message);
+        return;
+      }
+
+      toast({
+        title: "Registration successful!",
+        description: "Please check your email to verify your account.",
+      });
+      navigate("/sign-in");
     } catch (err) {
       if (err instanceof z.ZodError) {
         setError(err.errors[0].message);
-        setLoading(false);
-        return;
+      } else if (err instanceof Error) {
+        setError(err.message || "Failed to fetch");
+      } else {
+        setError("Failed to fetch");
       }
-    }
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    toast({
-      title: "Registration successful!",
-      description: "Please check your email to verify your account.",
-    });
-    navigate("/sign-in");
   };
 
   return (
@@ -91,6 +93,7 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
 
@@ -102,6 +105,7 @@ export default function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
 
