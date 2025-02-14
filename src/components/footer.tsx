@@ -1,74 +1,102 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ContactDialog } from "./dialogs/ContactDialog";
-import { PrivacyDialog } from "./dialogs/PrivacyDialog";
-
-const teamMembers = [
-  {
-    name: "Shivansh Srivastava",
-    role: "Team Leader",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=shivansh",
-  },
-  {
-    name: "Hitarth Soni",
-    role: "Backend Developer",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=hitarth",
-  },
-  {
-    name: "Harshil Vadalia",
-    role: "Designer and ML Work",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=harshil",
-  },
-  {
-    name: "Harsh Kadecha",
-    role: "Frontend Developer",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=harsh",
-  },
-];
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Shield } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="border-t bg-background/60 backdrop-blur-md">
-      <div className="container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-8">
-          {/* Team Section */}
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold mb-4 animate-fade-in">
-              Our Team
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {teamMembers.map((member, index) => (
-                <div
-                  key={member.name}
-                  className="p-4 rounded-lg border bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-colors animate-fade-in-up flex items-center gap-4"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <Avatar className="h-12 w-12 border-2 border-primary/20">
-                    <AvatarImage src={member.avatar} alt={member.name} />
-                    <AvatarFallback>{member.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{member.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {member.role}
-                    </div>
-                  </div>
-                </div>
-              ))}
+    <footer className="bg-black text-white py-16">
+      <div className="container grid grid-cols-1 md:grid-cols-4 gap-12">
+        {/* Brand Section */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold">M</span>
             </div>
+            <div className="text-2xl font-bold font-mono">MaskOff</div>
           </div>
-
-          {/* Links Section */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-center md:justify-end gap-8">
-              <PrivacyDialog />
-              <ContactDialog />
+          <p className="text-gray-400 text-sm max-w-xs">
+            Advanced deepfake detection platform helping organizations verify
+            content authenticity.
+          </p>
+          <div className="space-y-2">
+            <div className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer">
+              TERMS OF SERVICE
+            </div>
+            <div className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer">
+              PRIVACY POLICY
             </div>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="text-center text-sm text-muted-foreground pt-8 border-t animate-fade-in-delay">
-          © {new Date().getFullYear()} MaskOff. All rights reserved.
+        {/* Features Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">FEATURES</h3>
+          <div className="space-y-2">
+            <div className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer">
+              VIDEO DETECTION
+            </div>
+            <div className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer">
+              AUDIO ANALYSIS
+            </div>
+            <div className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer">
+              TEXT VERIFICATION
+            </div>
+            <div className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer">
+              API ACCESS
+            </div>
+          </div>
+        </div>
+
+        {/* Updates Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">STAY UPDATED</h3>
+          <div className="space-y-4">
+            <Input
+              placeholder="EMAIL ADDRESS"
+              type="email"
+              className="bg-transparent border-0 border-b border-gray-700 rounded-none px-0 text-sm placeholder:text-gray-500 focus-visible:ring-0 focus-visible:border-gray-400"
+            />
+            <Button
+              variant="outline"
+              className="rounded-full border-gray-700 text-gray-400 hover:text-white hover:border-white transition-colors"
+            >
+              SUBSCRIBE TO UPDATES
+            </Button>
+          </div>
+        </div>
+
+        {/* Support Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">SUPPORT</h3>
+          <div className="space-y-2">
+            <div className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer">
+              DOCUMENTATION
+            </div>
+            <div className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer">
+              API REFERENCE
+            </div>
+            <div className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer">
+              HELP CENTER
+            </div>
+            <div className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer">
+              CONTACT US
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Support Links - Only visible on mobile */}
+        <div className="md:hidden col-span-1 space-y-4">
+          <div className="flex flex-col space-y-2">
+            <div className="text-sm text-primary hover:text-primary/80 transition-colors cursor-pointer">
+              HELP CENTER
+            </div>
+            <div className="text-sm text-primary hover:text-primary/80 transition-colors cursor-pointer">
+              API DOCS
+            </div>
+            <div className="text-sm text-primary hover:text-primary/80 transition-colors cursor-pointer">
+              CONTACT US
+            </div>
+          </div>
         </div>
       </div>
     </footer>

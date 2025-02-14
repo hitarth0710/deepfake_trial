@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Shield,
   Wand2,
@@ -8,9 +9,55 @@ import {
   Zap,
   Lock,
   Users,
+  Github,
+  Twitter,
+  Linkedin,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "./layout";
+
+const teamMembers = [
+  {
+    name: "Shivansh Srivastava",
+    role: "Team Leader",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=shivansh",
+    social: {
+      twitter: "https://twitter.com",
+      linkedin: "https://linkedin.com",
+      github: "https://github.com",
+    },
+  },
+  {
+    name: "Hitarth Soni",
+    role: "Backend Developer",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=hitarth",
+    social: {
+      twitter: "https://twitter.com",
+      linkedin: "https://linkedin.com",
+      github: "https://github.com",
+    },
+  },
+  {
+    name: "Harshil Vadalia",
+    role: "Designer and ML Work",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=harshil",
+    social: {
+      twitter: "https://twitter.com",
+      linkedin: "https://linkedin.com",
+      github: "https://github.com",
+    },
+  },
+  {
+    name: "Harsh Kadecha",
+    role: "Frontend Developer",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=harsh",
+    social: {
+      twitter: "https://twitter.com",
+      linkedin: "https://linkedin.com",
+      github: "https://github.com",
+    },
+  },
+];
 
 export default function Home() {
   const navigate = useNavigate();
@@ -64,7 +111,7 @@ export default function Home() {
               <Button
                 size="lg"
                 className="group"
-                onClick={() => navigate("/analyze")}
+                onClick={() => navigate("/dashboard")}
               >
                 Start Detection
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -103,6 +150,51 @@ export default function Home() {
               <p className="text-muted-foreground">{feature.description}</p>
             </div>
           ))}
+        </div>
+
+        {/* Team Section */}
+        <div className="max-w-6xl mx-auto mb-20">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Meet Our Team
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {teamMembers.map((member) => (
+              <div
+                key={member.name}
+                className="p-6 rounded-xl border bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-all duration-200 hover:scale-[1.02] text-center group"
+              >
+                <Avatar className="h-24 w-24 mx-auto border-2 border-primary/20 mb-4 group-hover:border-primary transition-colors">
+                  <AvatarImage src={member.avatar} alt={member.name} />
+                  <AvatarFallback>{member.name[0]}</AvatarFallback>
+                </Avatar>
+                <div className="space-y-1 mb-4">
+                  <div className="font-semibold text-lg">{member.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {member.role}
+                  </div>
+                </div>
+                <div className="flex justify-center gap-4">
+                  {Object.entries(member.social).map(([platform, url]) => (
+                    <a
+                      key={platform}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-primary hover:scale-110 transition-all duration-200"
+                    >
+                      {platform === "github" && <Github className="h-5 w-5" />}
+                      {platform === "twitter" && (
+                        <Twitter className="h-5 w-5" />
+                      )}
+                      {platform === "linkedin" && (
+                        <Linkedin className="h-5 w-5" />
+                      )}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Trust Indicators */}

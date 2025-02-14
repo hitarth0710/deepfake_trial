@@ -17,7 +17,7 @@ export default function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         <Link
           to="/"
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 hover:opacity-80 hover:scale-105 transition-all duration-200"
         >
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
             <span className="text-primary-foreground font-bold">M</span>
@@ -25,13 +25,19 @@ export default function Navbar() {
           <span className="font-bold">MaskOff</span>
         </Link>
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/docs")}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/docs")}
+            className="hover:scale-105 transition-all duration-200"
+          >
             Documentation
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate("/pricing")}
+            className="hover:scale-105 transition-all duration-200"
           >
             Pricing
           </Button>
@@ -41,6 +47,7 @@ export default function Navbar() {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
+                className="hover:scale-105 transition-all duration-200"
               >
                 Dashboard
               </Button>
@@ -48,15 +55,25 @@ export default function Navbar() {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/profile")}
+                className="hover:scale-105 transition-all duration-200"
               >
                 Profile
               </Button>
-              <Button size="sm" variant="outline" onClick={handleSignOut}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleSignOut}
+                className="hover:scale-105 transition-all duration-200"
+              >
                 Sign Out
               </Button>
             </div>
           ) : (
-            <Button size="sm" onClick={() => navigate("/sign-in")}>
+            <Button
+              size="sm"
+              onClick={() => navigate("/sign-in")}
+              className="hover:scale-105 transition-all duration-200"
+            >
               Sign In
             </Button>
           )}

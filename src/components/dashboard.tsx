@@ -1,15 +1,22 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Wand2, FileAudio, FileText } from "lucide-react";
+import { Shield, FileAudio, Image } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
 import Navbar from "./navbar";
 import Footer from "./footer";
 import { useAuth } from "@/contexts/AuthContext";
+import { UploadDialog } from "./dialogs/UploadDialog";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [selectedFeature, setSelectedFeature] = useState<
+    (typeof features)[0] | null
+  >(null);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, File>>({});
 
   if (!user) {
     navigate("/sign-in");
@@ -27,15 +34,6 @@ export default function Dashboard() {
       acceptedTypes: ["video"],
     },
     {
-      title: "Video Transform",
-      description: "Create stunning video transformations",
-      icon: Wand2,
-      path: "/transform",
-      color: "bg-purple-500/10",
-      textColor: "text-purple-500",
-      acceptedTypes: ["video"],
-    },
-    {
       title: "Audio Analysis",
       description: "Detect AI-generated voices and audio deepfakes",
       icon: FileAudio,
@@ -45,13 +43,13 @@ export default function Dashboard() {
       acceptedTypes: ["audio"],
     },
     {
-      title: "Text Analysis",
-      description: "Check text content for AI generation and plagiarism",
-      icon: FileText,
-      path: "/analyze-text",
-      color: "bg-orange-500/10",
-      textColor: "text-orange-500",
-      acceptedTypes: ["text"],
+      title: "Image Detection",
+      description: "Identify manipulated and AI-generated images",
+      icon: Image,
+      path: "/analyze-image",
+      color: "bg-purple-500/10",
+      textColor: "text-purple-500",
+      acceptedTypes: ["image"],
     },
   ];
 
@@ -65,15 +63,18 @@ export default function Dashboard() {
             Welcome back{user.email ? `, ${user.email.split("@")[0]}` : ""}
           </h1>
           <p className="text-muted-foreground mb-8">
-            Manage your videos and access our AI tools
+            Manage your content analysis and access our AI tools
           </p>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-12">
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
             {features.map((feature) => (
               <Card
                 key={feature.title}
                 className="p-6 hover:shadow-lg transition-shadow cursor-pointer group"
-                onClick={() => navigate(feature.path)}
+                onClick={() => {
+                  setSelectedFeature(feature);
+                  setUploadDialogOpen(true);
+                }}
               >
                 <div
                   className={`${feature.color} ${feature.textColor} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
@@ -88,6 +89,44 @@ export default function Dashboard() {
               </Card>
             ))}
           </div>
+
+          {/* Display uploaded audio files */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            {Object.entries(uploadedFiles).map(([type, file]) =>
+              type === "audio" ? (
+                <Card key={type} className="p-6">
+                  <div className="rounded-lg bg-muted mb-4 flex items-center justify-center p-4">
+                    <audio
+                      src={URL.createObjectURL(file)}
+                      controls
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="font-medium mb-2">{file.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {(file.size / (1024 * 1024)).toFixed(2)} MB
+                  </div>
+                </Card>
+              ) : null,
+            )}
+          </div>
+
+          {/* Upload Dialog */}
+          {selectedFeature && (
+            <UploadDialog
+              open={uploadDialogOpen}
+              onOpenChange={setUploadDialogOpen}
+              title={`Upload ${selectedFeature.title}`}
+              description={selectedFeature.description}
+              acceptedTypes={selectedFeature.acceptedTypes}
+              onFileSelect={(file) => {
+                setUploadedFiles((prev) => ({
+                  ...prev,
+                  [selectedFeature.acceptedTypes[0]]: file,
+                }));
+              }}
+            />
+          )}
 
           {/* Recent Activity Section */}
           <div className="mt-12">
