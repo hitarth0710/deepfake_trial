@@ -40,11 +40,24 @@ export const api = {
     formData.append("file", file);
 
     try {
+      // Start progress simulation
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += 2;
+        if (progress <= 100) {
+          onProgress?.(progress);
+        }
+        if (progress >= 100) {
+          clearInterval(progressInterval);
+        }
+      }, 100);
+
       const response = await fetch(config.endpoints.audio, {
         method: "POST",
         body: formData,
       });
 
+      clearInterval(progressInterval);
       const data = await response.json();
 
       if (!response.ok) {
