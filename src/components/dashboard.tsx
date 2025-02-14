@@ -28,7 +28,7 @@ export default function Dashboard() {
       title: "Video Analysis",
       description: "Detect deepfakes with our advanced AI technology",
       icon: Shield,
-      path: "/analyze",
+      path: "/video-detection",
       color: "bg-blue-500/10",
       textColor: "text-blue-500",
       acceptedTypes: ["video"],
@@ -37,7 +37,7 @@ export default function Dashboard() {
       title: "Audio Analysis",
       description: "Detect AI-generated voices and audio deepfakes",
       icon: FileAudio,
-      path: "/analyze-audio",
+      path: "/audio-detection",
       color: "bg-green-500/10",
       textColor: "text-green-500",
       acceptedTypes: ["audio"],
@@ -46,7 +46,7 @@ export default function Dashboard() {
       title: "Image Detection",
       description: "Identify manipulated and AI-generated images",
       icon: Image,
-      path: "/analyze-image",
+      path: "/image-detection",
       color: "bg-purple-500/10",
       textColor: "text-purple-500",
       acceptedTypes: ["image"],
@@ -72,8 +72,7 @@ export default function Dashboard() {
                 key={feature.title}
                 className="p-6 hover:shadow-lg transition-shadow cursor-pointer group"
                 onClick={() => {
-                  setSelectedFeature(feature);
-                  setUploadDialogOpen(true);
+                  navigate(feature.path);
                 }}
               >
                 <div

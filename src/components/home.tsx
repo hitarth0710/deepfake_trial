@@ -111,9 +111,9 @@ export default function Home() {
               <Button
                 size="lg"
                 className="group"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate("/video-detection")}
               >
-                Start Detection
+                Get Started
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button

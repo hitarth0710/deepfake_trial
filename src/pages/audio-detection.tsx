@@ -8,17 +8,13 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
 
-export default function VideoDetection() {
+export default function AudioDetection() {
   const [file, setFile] = useState<File | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<{
     result?: "REAL" | "FAKE";
     confidence?: number;
-    frame_predictions?: Array<[boolean, number]>;
-    faces_detected?: boolean[];
-    total_frames?: number;
-    frames_with_faces?: number;
   }>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -31,9 +27,9 @@ export default function VideoDetection() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      "video/*": [".mp4", ".webm", ".mov"],
+      "audio/*": [".mp3", ".wav", ".m4a"],
     },
-    maxSize: 100 * 1024 * 1024, // 100MB
+    maxSize: 50 * 1024 * 1024, // 50MB
     multiple: false,
   });
 
@@ -46,10 +42,7 @@ export default function VideoDetection() {
       setResult(null);
 
       // Send to Django backend
-      const response = await api.analyzeVideo(file, (progress) => {
-        setProgress(progress);
-      });
-
+      const response = await api.analyzeAudio(file);
       setResult(response);
     } catch (error) {
       console.error("Analysis failed:", error);
@@ -64,9 +57,9 @@ export default function VideoDetection() {
     <Layout>
       <div className="container max-w-3xl pt-32 pb-20">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">Video Deepfake Detection</h1>
+          <h1 className="text-4xl font-bold mb-2">Audio Deepfake Detection</h1>
           <p className="text-muted-foreground">
-            Upload a video to analyze it for potential deepfake manipulation
+            Upload an audio file to analyze it for potential AI-generated voices
           </p>
         </div>
 
@@ -85,15 +78,15 @@ export default function VideoDetection() {
               <input {...getInputProps()} />
               <Upload className="h-10 w-10 text-gray-400 mb-4" />
               <p className="text-lg font-medium text-gray-900 mb-1">
-                {file ? file.name : "Drag & drop your video here"}
+                {file ? file.name : "Drag & drop your audio file here"}
               </p>
               <p className="text-gray-500 mb-4">or</p>
               <Button variant="outline" className="mb-4">
-                Select Video
+                Select Audio
               </Button>
               <div className="text-center text-sm text-gray-500">
-                <p>Supported formats: MP4, WebM, QuickTime</p>
-                <p>Maximum file size: 100MB</p>
+                <p>Supported formats: MP3, WAV, M4A</p>
+                <p>Maximum file size: 50MB</p>
               </div>
             </div>
 
@@ -110,7 +103,7 @@ export default function VideoDetection() {
           {analyzing && (
             <Card className="p-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Analyzing Video</h3>
+                <h3 className="text-lg font-semibold">Analyzing Audio</h3>
                 <Progress value={progress} />
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -135,12 +128,12 @@ export default function VideoDetection() {
                     {result.result === "FAKE" ? (
                       <>
                         <AlertCircle className="w-4 h-4 mr-1" />
-                        Likely Deepfake
+                        AI Generated Voice
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="w-4 h-4 mr-1" />
-                        Likely Authentic
+                        Natural Voice
                       </>
                     )}
                   </Badge>
@@ -162,24 +155,6 @@ export default function VideoDetection() {
                       result.result === "FAKE" ? "bg-destructive" : ""
                     }
                   />
-                </div>
-
-                {/* Additional Analysis Details */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Total Frames:</span>
-                    <span className="ml-2 font-medium">
-                      {result.total_frames}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">
-                      Frames with Faces:
-                    </span>
-                    <span className="ml-2 font-medium">
-                      {result.frames_with_faces}
-                    </span>
-                  </div>
                 </div>
               </div>
             </Card>
