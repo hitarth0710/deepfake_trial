@@ -2,6 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { DocumentationDialog } from "./dialogs/DocumentationDialog";
+import { PricingDialog } from "./dialogs/PricingDialog";
+import { ProfileDialog } from "./dialogs/ProfileDialog";
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -25,22 +28,8 @@ export default function Navbar() {
           <span className="font-bold">MaskOff</span>
         </Link>
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/docs")}
-            className="hover:scale-105 transition-all duration-200"
-          >
-            Documentation
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/pricing")}
-            className="hover:scale-105 transition-all duration-200"
-          >
-            Pricing
-          </Button>
+          <DocumentationDialog />
+          <PricingDialog />
           {user ? (
             <div className="flex items-center gap-2">
               <Button
@@ -51,14 +40,7 @@ export default function Navbar() {
               >
                 Dashboard
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/profile")}
-                className="hover:scale-105 transition-all duration-200"
-              >
-                Profile
-              </Button>
+              <ProfileDialog />
               <Button
                 size="sm"
                 variant="outline"

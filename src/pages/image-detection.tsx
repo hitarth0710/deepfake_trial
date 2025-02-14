@@ -1,12 +1,17 @@
-import { Layout } from "@/components/layout";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
+import Navbar from "@/components/navbar";
+import { BackButton } from "@/components/ui/back-button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/lib/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function ImageDetection() {
   const [file, setFile] = useState<File | null>(null);
@@ -33,7 +38,20 @@ export default function ImageDetection() {
     multiple: false,
   });
 
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   const handleAnalyze = async () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to analyze images",
+        variant: "default",
+      });
+      navigate("/sign-in");
+      return;
+    }
     if (!file) return;
 
     try {
@@ -41,7 +59,7 @@ export default function ImageDetection() {
       setProgress(0);
       setResult(null);
 
-      // Send to Django backend
+      // Send to backend
       const response = await api.analyzeImage(file);
       setResult(response);
     } catch (error) {
@@ -54,7 +72,9 @@ export default function ImageDetection() {
   };
 
   return (
-    <Layout>
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <BackButton />
       <div className="container max-w-3xl pt-32 pb-20">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2">Image Deepfake Detection</h1>
@@ -161,6 +181,6 @@ export default function ImageDetection() {
           )}
         </div>
       </div>
-    </Layout>
+    </div>
   );
 }

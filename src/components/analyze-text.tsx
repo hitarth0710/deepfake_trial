@@ -31,6 +31,7 @@ export default function AnalyzeText() {
     <div className="w-screen min-h-screen bg-background">
       <Navbar />
       <BackButton />
+      <BackButton />
       <div className="container pt-32 pb-20">
         <div className="max-w-2xl mx-auto text-center">
           <FileText className="h-12 w-12 mx-auto mb-6 text-primary" />

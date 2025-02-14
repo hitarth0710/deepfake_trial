@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "./layout";
+import { AuthCheck } from "./auth/AuthCheck";
 
 const teamMembers = [
   {
@@ -24,7 +25,7 @@ const teamMembers = [
     social: {
       twitter: "https://twitter.com",
       linkedin: "https://linkedin.com",
-      github: "https://github.com",
+      github: "https://github.com/ShivanshSrivastava136",
     },
   },
   {
@@ -34,7 +35,7 @@ const teamMembers = [
     social: {
       twitter: "https://twitter.com",
       linkedin: "https://linkedin.com",
-      github: "https://github.com",
+      github: "https://github.com/hitarth0710",
     },
   },
   {
@@ -44,7 +45,7 @@ const teamMembers = [
     social: {
       twitter: "https://twitter.com",
       linkedin: "https://linkedin.com",
-      github: "https://github.com",
+      github: "https://github.com/harshilvadalia",
     },
   },
   {
@@ -54,7 +55,7 @@ const teamMembers = [
     social: {
       twitter: "https://twitter.com",
       linkedin: "https://linkedin.com",
-      github: "https://github.com",
+      github: "https://github.com/HarshKadecha11",
     },
   },
 ];
@@ -108,14 +109,16 @@ export default function Home() {
               against digital manipulation.
             </p>
             <div className="flex flex-wrap justify-center gap-4 mb-16">
-              <Button
-                size="lg"
-                className="group"
-                onClick={() => navigate("/video-detection")}
-              >
-                Get Started
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <AuthCheck>
+                <Button
+                  size="lg"
+                  className="group"
+                  onClick={() => navigate("/video-detection")}
+                >
+                  Get Started
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </AuthCheck>
               <Button
                 size="lg"
                 variant="outline"
@@ -192,31 +195,6 @@ export default function Home() {
                     </a>
                   ))}
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Trust Indicators */}
-        <div className="text-center mb-20">
-          <p className="text-sm font-medium text-muted-foreground mb-6">
-            TRUSTED BY INDUSTRY LEADERS
-          </p>
-          <div className="flex flex-wrap justify-center gap-8 opacity-50">
-            {[
-              "Netflix",
-              "Disney",
-              "Warner Bros",
-              "Universal",
-              "Paramount",
-              "Sony Pictures",
-            ].map((company) => (
-              <div
-                key={company}
-                className="flex items-center gap-2 animate-fade-in-up"
-              >
-                <CheckCircle className="h-4 w-4" />
-                <span className="font-semibold">{company}</span>
               </div>
             ))}
           </div>
